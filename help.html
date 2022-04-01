@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+    <head>
+        <title>Ayuda - Imagenes generadas utilizando API Canvas 2D Context y funciones matem&aacute;ticas</title>
+        <meta charset="utf-8" />
+        <meta name="description" content="Imagenes generadas utilizando API Canvas 2D Context y funciones matematicas" />
+        <meta name="keywords" content="imagenes, generadas, canvas, 2d context, html5, funciones matematicas, sin, cos, tan, seno, coseno, tangente" />
+        
+        <link rel="stylesheet" href="css/base.css" />
+        <style type="text/css">
+            #help_body{
+                position: relative;
+                text-align: justify;
+                width: 95%;
+                margin-left: 2%;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2 style="display:block; margin: 1%;">Ayuda, descripci&oacute;n o como quiereas tomarlo, sobre: <br/>
+        <a href="index.html">Imagenes generadas utilizando API Canvas 2D Context y funciones matem&aacute;ticas</a></h2>
+        <hr/>
+        <div id="help_body">
+            <p>
+                Desde que se comenz&oacute; a hacer p&uacute;blico todo lo relacionado con HTML5 y sus potencialidades, 
+                una de las cosas que me impresion&oacute; fue la <a href="http://www.w3.org/TR/2dcontext/">API Canvas 2D Context</a> que viene incorporada como algo 
+                novedoso y muy interesante. Y es que realmente lo que se puede hacer con esta API y 
+                la integraci&oacute;n que permite con im&aacute;genes y videos es indudablemente muy prometedor, 
+                muchos ya expresan que estas tecnolog&iacute;as dar&aacute;n un vuelco a la web, 
+                como por ejemplo, que la reproducci&oacute;n de video de manera nativa en los navegadores -sin usar plugins 
+                de terceros- ser&aacute; el fin de los reproductores basados en Flash.
+            </p>
+            <p>
+                En fin, no voy a dar una disertaci&oacute;n sobre ello, porque no soy un experto ni nada por el estilo, solo voy dar una peque&ntilde;a explicaci&oacute;n sobre lo que hace esta "aplicaci&oacute;n web?", si no crees que te haga falta leer o simplemente no quieres leer esto, pues te lo saltas y ahorras tiempo.
+            </p>
+            <p>
+                Esta aplicaci&oacute;n utiliza la <a href="http://www.w3.org/TR/2dcontext/">API Canvas 2D Context</a> y varias funciones del objeto Math, para generar im&aacute;genes al vuelo que son mostrados en un elemento "canvas", permitiendo almacenar la imagen generada de manera temporal mediante el bot&oacute;n "Tomar instant&aacute;nea"; permitiendo luego listarlas, eliminarlas o guardarlas en el disco si te a gustado, esto se logra mediante los 6 botones a la derecha del elemento canvas y debajo del elemento imagen, que mostrara una instant&aacute;nea tomada con anterioridad.
+                <br/><br/>
+                
+                <em style="display: block; margin: 0em 0em 0em 4em;">
+                    <b>Aclaraci&oacute;n 1:</b> Esto lo hice porque aunque en Mozilla Firefox guardar la imagen directamente desde el elemento canvas es muy sencillo -basta con dar clic derecho y luego "Guarda imagen como"-   Chrome y Opera no tienen esta posibilidad, adem&aacute;s de agregar cierta funcionabilidad a la aplicaci&oacute;n.
+                    <p><b>Aclaraci&oacute;n 2: Esta aplicaci&oacute;n no tiene el objetivo de ser la mejor, ni la m&aacute;s r&aacute;pida, ni la m&aacute;s optimizada, ni la m&aacute;s "X" en cuanto a mostrar las potencialidades y dem&aacute;s caracter&iacute;sticas de estas tecnolog&iacute;as; aun as&iacute;, las cr&iacute;ticas, sugerencias y opiniones son bienvenidas.</b></p>
+                </em>
+            </p>
+            <p>
+                Debajo de los botones que se utilizan para las administraci&oacute;n de las instant&aacute;neas tomadas, est&aacute; una lista de nombres o descripciones de im&aacute;genes que se generan al vuelo, una vez seleccionadas -luego activar el bot&oacute;n "Iniciar" para comenzar la animaci&oacute;n- encabezada por el subtitulo "Im&aacute;genes predefinidas:", cada elemento de la lista lo que describe son los valores o datos que ir&aacute;n en cada uno de los elementos situados debajo del elemento canvas (XMid, YMid, X, Y, etc.), los cuales se evaluar&aacute;n mediante la funci&oacute;n eval- como c&oacute;digo JavaScript y que ser&aacute; utilizado para la generaci&oacute;n de la imagen correspondiente a estos valores, estas son muestras ya predefinidas. El bot&oacute;n "Animaci&oacute;n a JSON" permite obtener en dicho formato los par&aacute;metros y los valores que describen la misma.
+            </p>
+            <p>
+                Si mueven el puntero del rat&oacute;n por encima de algunos de los botones de control de animaci&oacute;n (Iniciar, Detener, Limpiar, Tomar instant&aacute;nea) y las lista de "Im&aacute;genes predefinidas", podr&aacute;n observar que se mostrara un peque&ntilde;o cuadro de informaci&oacute;n (tooltip) que contendr&aacute; las teclas de acceso para cada uno de estos elementos, con ellas se pueden ejecutar las acciones correspondientes a cada uno; esto es &uacute;til ya que si se activa la "modo de pantalla completa", el elemento canvas se ajustar&aacute; para ocupar toda la pantalla, permitiendo ver la animaci&oacute;n a pantalla completa, as&iacute; se podr&aacute; iniciar, detener, tomar una instant&aacute;nea o cambiar hacia otra imagen predefinida, sin tener que salir del "modo de pantalla completa" o tener que utilizar el mouse.
+            </p>
+            <p>
+                <b>Descripci&oacute;n de los campos:</b>
+                <ul>
+                    <li>
+                        <b>XMid:&nbsp;</b>Representa la coordenada respecto al eje X, desde donde se comenzar&aacute; a imprimir la imagen en el elemento canvas.
+                    </li>
+                    <li>
+                        <b>YMid:&nbsp;</b>Representa la coordenada respecto al eje Y, desde donde se comenzar&aacute; a imprimir la imagen en el elemento canvas.
+                    </li>
+                    <li>
+                        <b>X:&nbsp;</b>Expresi&oacute;n que se evaluar&aacute; en cada interacci&oacute;n que devolver&aacute; la coordenada respecto al eje X del pr&oacute;ximo punto a imprimir.
+                    </li>
+                    <li>
+                        <b>Y:&nbsp;</b>Expresi&oacute;n que se evaluar&aacute; en cada interacci&oacute;n que devolver&aacute; la coordenada respecto al eje Y del pr&oacute;ximo punto a imprimir.
+                    </li>
+                    <li>
+                        <b>Inc angle:&nbsp;</b>Valor que se utilizar&aacute; para el incremento en cada interacci&oacute;n del &aacute;ngulo utilizado en la generaci&oacute;n de la imagen.
+                    </li>
+                    <li>
+                        <b>Radio:&nbsp;</b>Valor de inicio establecido para el radio -referente a circunferencia- utilizado en la generaci&oacute;n de la imagen.
+                    </li>
+                    <li>
+                        <b>Inc radio:&nbsp;</b>Valor que se utilizar&aacute; para el incremento en cada interacci&oacute;n del radio.
+                    </li>
+                    <li>
+                        <b>Desvanecimiento:&nbsp;</b>Habilita o deshabilita el efecto de desvanecimiento de la imagen.
+                    </li>
+                </ul>
+            </p>
+            <p>
+                Estos pueden ser editados con el objetivo de experimentar y generar nuevas im&aacute;genes. Es de se&ntilde;alar que la ejecuci&oacute;n es mucho m&aacute;s r&aacute;pida en Chrome y Opera que en Firefox. Hasta aqu&iacute; esta breve ayuda o descripci&oacute;n de lo que hace y utiliza esta aplicaci&oacute;n, espero que les resulte entretenida e interesante.
+            </p>
+        </div>
+    </body>
+</html>

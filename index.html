@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+    <head>
+        <title>Im&aacute;genes generadas utilizando API Canvas 2D Context y funciones matem&aacute;ticas</title>
+        <meta charset="utf-8" />
+        <meta name="description" content="Im&aacute;genes generadas mediante JavaScript utilizando la API Canvas 2D Context y las funciones matem&aacute;ticas del objeto Math" />
+        <meta name="keywords" content="imagenes, generadas, canvas, api 2d context, html5, funciones matematicas, javascript, Math, sin, cos, tan, atan, seno, coseno, tangente" />
+        
+        <link rel="stylesheet" href="css/base.css" />
+
+        <script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="js/line.js"></script>
+        <script type="text/javascript" src="js/ua.js"></script>
+        <script type="text/javascript" src="js/canvas.js"></script>
+        
+        <script type="text/javascript">
+            var ua=uaMatch(navigator.userAgent);
+            
+            function init(){
+                document.getElementById('init').disabled=true;
+                main();
+            }
+            
+            function stop(){
+                try{
+                    clearInterval(pix.hInterval);
+                    document.getElementById('init').disabled=false;
+                }catch(e){};
+            }
+            
+            function clear_canvas(){
+                context.fillStyle = 'rgba(0,0,0,1)';
+                context.fillRect(0,0, canvas.width, canvas.height);
+            }
+            
+            function clickToElement(el) {
+                var evt = document.createEvent('Event');
+                evt.initEvent('click', true, true);
+                el.dispatchEvent(evt);
+            }
+            
+            function floatMessage(text_msg){
+                if(!text_msg) return;
+                if(!$('div#_id_float_message').length)
+                    var msg = $('<div id="_id_float_message" class="message"></div>');
+                else
+                    var msg = $('div#_id_float_message');
+                var text = String(text_msg);
+                msg.html(text);
+                msg.appendTo('body');
+                msg.fadeIn(2000, function(){
+                    setTimeout(function(){$('div#_id_float_message').fadeOut(1000);}, 1500);
+                });
+            }
+            
+            //Deteccion de "full screen" mediante evento resize
+            function onBodyResize(evnt){
+                function isFullScreen(){
+                    //Por Firefox :(
+                    if((screen.width - window.innerWidth < 10) && (screen.height - window.innerHeight < 10)) return true;
+                    return false;
+                };
+                
+                if(isFullScreen()){
+                    $('body>*:not(canvas)').css('display','none');
+                    $('body').css('cursor', 'none')
+                    $('canvas#canvas_id').attr('title', '');
+                    $('canvas').css({'position': 'absolute', 
+                        'width': window.innerWidth, 
+                        'height': window.innerHeight,
+                        'margin': '0px'});
+                    
+                    if($('select#sel_predefined > option:selected').length && $('input[type="button"]:disabled').length)
+                        floatMessage($('select#sel_predefined > option:selected').html() 
+                            + '(' + $('select#sel_predefined > option:selected').index() + '/' 
+                            + $('select#sel_predefined > option').length + ')');
+                }
+                else{
+                    $('body>*:not(canvas)').css('display','');
+                    $('body').css('cursor', 'auto');
+                    $('canvas#canvas_id').attr('title', 'Inicie el modo pantalla completa para ver la animacion maximizada');
+                    $('canvas').css({'position': 'relative', 
+                        'width': $('canvas').attr('width'), 
+                        'height': $('canvas').attr('height'),
+                        'margin': '5px',
+                    });
+                }
+            };
+            
+            function onBodyKeyPress(evnt){
+                if(!evnt.charCode)
+                    return true;
+                    
+                if($('input[type="text"]:focus').length) return true;
+                evnt.preventDefault();
+
+                switch(String.fromCharCode(evnt.charCode).toLowerCase()){
+                //Iniciar animacion
+                case 'i':
+                    if($('input#init:not(:disabled)').length){
+                        floatMessage($('select#sel_predefined > option:selected').html() 
+                            + '(' + ($('select#sel_predefined > option:selected').index()+1) + '/' 
+                            + $('select#sel_predefined > option').length + ')');
+                        clickToElement($('input#init')[0]);
+                    }
+                    break;
+                
+                //Detener animacion    
+                case 'd':
+                    stop();
+                    break;
+                    
+                //Limpiar camvas
+                case 'l':
+                    clear_canvas();
+                    break;
+                    
+                //Timar instantanea
+                case 't':
+                    takeCanvasPreview('canvas_preview');
+                    break;
+                
+                //Siguiente animacion
+                case 's':
+                    var tmpEl = $('select#sel_predefined > option:checked')[0];
+                    if(!tmpEl){
+                        $('select#sel_predefined > option')[0].selected=true;
+                    }
+                    else{
+                        tmpEl.selected= false;
+                        if(tmpEl.nextElementSibling)
+                            tmpEl.nextElementSibling.selected=true;
+                        else
+                            $('select#sel_predefined > option:first-child').attr('selected', 'true');
+                    }
+                    onClicSelect();
+                    if($('input#init:disabled').length){
+                        stop(); clear_canvas(); init();
+                    }
+                    floatMessage($('select#sel_predefined > option:selected').html() 
+                            + '(' + ($('select#sel_predefined > option:selected').index()+1) + '/' 
+                            + $('select#sel_predefined > option').length + ')');
+                    break;
+                
+                //Anterior animacion
+                case 'a':
+                    var tmpEl = $('select#sel_predefined > option:checked')[0];
+                    if(!tmpEl){
+                        $('select#sel_predefined > option')[0].selected=true;
+                    }
+                    else{
+                        tmpEl.selected= false;
+                        if(tmpEl.previousElementSibling)
+                            tmpEl.previousElementSibling.selected=true;
+                        else
+                            $('select#sel_predefined > option:last-child').attr('selected', 'true');
+                    }
+                    onClicSelect();
+                    if($('input#init:disabled').length){
+                        stop(); clear_canvas(); init();
+                    }
+                    floatMessage($('select#sel_predefined > option:selected').html() 
+                            + '(' + ($('select#sel_predefined > option:selected').index()+1) + '/' 
+                            + $('select#sel_predefined > option').length + ')');
+                    break;
+                }
+            }
+            
+            function save_all_inst(){
+                if(!arrayInst.length) return;
+                for(i=0; i<= arrayInst.length-1; i++){
+                    var atag = $('<a style=\"display:none;\" href=\"' + arrayInst[i] + '\" download=\"instantanea_' + (i+1) + '.png\"></a>');
+                    atag.appendTo('body');
+                    clickToElement(atag[0]);
+                    atag.remove();
+                }
+            }
+            
+            $(function(){
+                canvas = document.getElementById('canvas_id');
+                if(canvas.getContext){
+                    context = canvas.getContext('2d');
+                    context.fillStyle = 'rgba(0,0,0,1)';
+                    context.fillRect(0,0, canvas.width, canvas.height);
+                    
+                    $('input#save_all_instances').css({'display':'none','visibility':'hidden'}).attr({'disabled':true,});
+                    if(ua.browser=='chrome' || ((ua.browser=='opr' || ua.browser=='opera') && parseInt(ua.version)>=16))
+                        $('input#save_all_instances').css({'display':'','visibility':''}).attr({'disabled':false,});
+                }else{
+                    window.location = 'error_not_support.html';
+                }
+                
+                $('body')[0].onresize=onBodyResize;
+                $('body')[0].onkeypress = onBodyKeyPress;
+                
+                $('#predefined_images').html('Im&aacute;genes predefinidas: ' + $('#sel_predefined').children('option').length);
+                
+                var m = 'mailto:' + 'danielxdad' + '[at]gmail' + '[dot]com';
+                while(m.indexOf('[at]') != -1 || m.indexOf('[dot]') != -1) m=m.replace('[at]', '@').replace('[dot]', '.');
+                $('a#mail').attr({'href': m});
+                
+                $('img#canvas_preview').click(function(){
+                    if(arrayInst.length && arrayInst.currentIndex  >= 0)
+                        window.open(this.src);
+                });
+                
+                $('select#sel_predefined').change(function(event){
+                    if($(event.target).children(':selected').length){
+                        onClicSelect(); 
+                        if($('input#init:disabled').length){
+                            stop(); clear_canvas(); init();
+                        }
+                    }
+                });
+                
+                $('canvas#canvas_id').attr('title', 'Inicie el modo pantalla completa para ver la animacion maximizada');
+                
+                $('select#sel_predefined > option').each(function(i){if(i%2){$(this).css('background-color', 'rgba(0,128,128,0.6)');}});
+            });
+            </script>
+    </head>
+    
+    <!--[if lt IE 9]><body onload="window.location = 'error_not_support.html';"><!--<![endif]-->
+    <!--[if !(IE) ]><!--><body><!--<![endif]-->
+        <canvas id="canvas_id" width="640" height="480">
+            <div id="no_support_error_message" class="float_error_message">
+            Lo siento, pero la aplicaci&oacute;n no se ejecutar&aacute; correctamente dado que su navegador no soporta 
+            la <a href="http://www.w3.org/TR/2dcontext/">API Canvas 2D Context</a>, por favor, actual&iacute;celo a un 
+            versi&oacute;n m&aacute;s reciente.
+            <!--[if IE]><!-->
+            O tome otra alternativa como <a href="http://www.mozilla.org/">Mozilla Firefox</a>, 
+            <a href="http://www.google.com/chrome/">Google Chrome</a> u <a href="http://www.opera.com/">Opera</a>.
+            <!--<![endif]-->
+            </div>
+        </canvas>
+        <img id="canvas_preview" width="320" height="240" src="images/empty-image.png" title="Click para ver la im&aacute;gen en una nueva ventana"/><br/>
+        <b style="float: left;">Instant&aacute;nea:&nbsp;</b>
+        <div id="inst_number" style="float: left;">0</div><b style="float: left;">/</b><div id="inst_counter">0</div>
+        <input type="button" value="|<" onclick="show_inst_first('canvas_preview');" title="Ir a la primera"/>
+        <input type="button" value="<<" onclick="show_inst('canvas_preview', -1);" title="Anterior"/>
+        <input type="button" value=">>" onclick="show_inst('canvas_preview', 1);" title="Siguiente"/>
+        <input type="button" value=">|" onclick="show_inst_last('canvas_preview');" title="Ir a la &uacute;ltima"/>
+        <input type="button" value="X" onclick="delete_inst('canvas_preview');" title="Eliminar esta"/>
+        <input type="button" value="|X|" onclick="delete_all_inst('canvas_preview');" title="Eliminar todas"/>
+        <input type="button" id="save_all_instances" value="|V|" onclick="save_all_inst();" title="Guardar todas las instant&aacute;neas"/>
+        <p>
+            <div id="predefined_images"></div>
+            <select id="sel_predefined" size="20" title="Teclas de acceso: A => Ir a la anterior. S => Ir a la siguiente">
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle*0) * pix.radio;","shadow":false}'>
+                    L&iacute;nea horizontal
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(Math.PI) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle) * pix.radio;","shadow":false}'>
+                    L&iacute;nea vertical
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid - Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle) * pix.radio;","shadow":false}'>
+                    L&iacute;nea oblicua
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/3 + Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;"}'>
+                    Triangulo giratorio
+                </option>
+                  <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/4 + 0.5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"70","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":true}'>
+                    Cuadrado giratorio con desvanecimiento
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"70","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;"}'>
+                    Circulo
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"10*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;"}'>
+                    Espiral ascendente-descendente
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/2 + 37*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;"}'>
+                    Estrella giratoria
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"154.3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"120","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.sin(pix.angle) *pix.radio;","shadow":true}'>
+                    Estrella de 7 puntas
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle*2) * pix.radio;"}'>
+                    Infinito ascendente-descendente
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"70","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.sin(pix.angle*2) * pix.radio;","shadow":true}'>
+                    Infinito con desvanecimiento
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/5","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":true}'>
+                    Pent&aacute;ono con desvanecimiento
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/6","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":true}'>
+                    Hexagono con desvanecimiento
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/7","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":true}'>
+                    Ept&aacute;gono con desvanecimiento
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/8","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":true}'>
+                    Oct&aacute;gono con desvanecimiento
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"3*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.atan(Math.sin(pix.angle)*2) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.cos(pix.angle)*3) * pix.radio;","shadow":false}'>
+                    Monitores?
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.atan(Math.tan(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.cos(pix.angle)) * pix.radio;","shadow":false}'>
+                    Nuez
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(Math.cos(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(Math.sin(pix.angle)) * pix.radio;","shadow":false}'>
+                    Equis 1
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"7*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle) * pix.radio;","shadow":false}'>
+                    Equis 2
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.2","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.sin(pix.angle) * pix.radio;","shadow":true}'>
+                    Equis 3
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI/4","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.tan(pix.angle) *pix.radio;","shadow":true}'>
+                    Equis 4
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.1","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.tan(pix.angle) * pix.radio;","shadow":false}'>
+                    Equis 5
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"7*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.tan(Math.cos(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.sin(pix.angle)) * pix.radio;","shadow":false}'>
+                    Ovalo
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"7*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sqrt(Math.tan(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Conexi&oacute;n
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"7*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.cos(Math.sin(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.sin(pix.angle)) * pix.radio;","shadow":false}'>
+                    Alas
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Corazones?
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"2*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.LOG2E * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Ara&ntilde;a
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.4","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.tan(pix.angle) * pix.radio;","shadow":true}'>
+                    Rayo
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI/4","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.tan(pix.angle) * pix.radio;","shadow":true}'>
+                    Par&eacute;ntesis
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/4 + 0.5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"70","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.sin(pix.angle*2) * pix.radio;","shadow":true}'>
+                    X 3D?
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*2/3 + 0.5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"70","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.sin(pix.angle*2) * pix.radio;","shadow":true}'>
+                    Tri&aacute;ngulo 3D?
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"90*Math.PI/180","ymid":"canvas.height/2;","init_radio":"80","toevalX":"pix.xmid + Math.tan(Math.cos(pix.angle)) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.atan(Math.sin(pix.angle)) * pix.radio;","shadow":true}'>
+                    Diamante
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"15*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.acos(Math.sin(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.cos(pix.angle)) * pix.radio;","shadow":false}'>
+                    Ojos
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"15*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.asin(Math.sin(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.cos(pix.angle)) * pix.radio;","shadow":false}'>
+                    Ojo
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"30*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.acos(Math.cos(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.asin(Math.tan(pix.angle)) * pix.radio;","shadow":false}'>
+                    Flechas?
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"15*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.asin(Math.sin(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.asin(Math.cos(pix.angle)) * pix.radio;","shadow":false}'>
+                    Espiral cuadrada
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 1
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"2*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(Math.cos(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.sin(pix.angle)) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 2
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"7*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 3
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"7*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sqrt(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 4
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"20*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.atan(Math.acos(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.asin(pix.angle)) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 5
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"20*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.atan(Math.asin(pix.angle)) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.asin(pix.angle)) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 6
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 7
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"2*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.PI * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 8
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"2*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.E * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 9
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"5*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.sin(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.cos(pix.angle*2) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 10
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.2","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*3) * pix.radio;","shadow":true}'>
+                    Sin t&iacute;tulo 11
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.4","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*2) * pix.radio;","shadow":true}'>
+                    Sin t&iacute;tulo 12
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.6","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*5) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 13
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.6","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*9) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 14
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.7","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*2) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 15
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.7","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*4) * pix.radio;","shadow":true}'>
+                    Sin t&iacute;tulo 16
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.7","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*5) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 17
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.7","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*8) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 18
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.7","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*9) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 19
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.9","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*3) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 20
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.9","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*7) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 21
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI*0.01","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.cos(pix.angle*3) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 22
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"Math.PI/180","ymid":"canvas.height/2;","init_radio":"60","toevalX":"pix.xmid + Math.tan(pix.angle*1.5) * pix.radio;","inc_radio":"0","toevalY":"pix.ymid + Math.tan(pix.angle) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 23
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"15*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.acos(Math.sin(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.asin(Math.cos(pix.angle)) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 24
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"15*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.atan(Math.sin(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.atan(Math.cos(pix.angle)) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 25
+                </option>
+                <option value='{"xmid":"canvas.width/2;","inc_angle":"30*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.asin(Math.cos(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.acos(Math.tan(pix.angle)) * pix.radio;","shadow":false}'>
+                    Sin t&iacute;tulo 26
+                </option>
+            </select>
+        </p>
+        <table>
+            <tr>
+                <td><b>XMid:</b></td>
+                <td><input type="text" id="xmid" size="37" value=""/></td>
+                
+                <td><b>Inc angle:</b></td>
+                <td><input type="text" id="inc_angle" size="30" value=""/></td>
+            </tr>
+            <tr>
+                <td><b>YMid:</b></td>
+                <td><input type="text" id="ymid" size="37" value=""/></td>
+                
+                <td><b>Radio:</b></td>
+                <td><input type="text" id="init_radio" size="30" value=""/></td>
+            </tr>
+            <tr>
+                <td><b>X:</b></td>
+                <td><input type="text" id="toevalX" size="37" value=""/></td>
+                
+                <td><b>Inc radio:</b></td>
+                <td><input type="text" id="inc_radio" size="30" value=""/></td>
+            </tr>
+            <tr>
+                <td><b>Y:</b></td>
+                <td><input type="text" id="toevalY" size="37" value=""/></td>
+                
+                <td><b><label for="shadow">Desvanecimiento:</label></b></td>
+                <td><input type="checkbox" id="shadow" /></td>
+            </tr>
+        </table>&nbsp;
+        <input type="button" id="init" value="Iniciar" onclick="init();" title="Tecla de acceso: I"/>
+        <input type="button" id="stop" value="Detener" onclick="stop();" title="Tecla de acceso: D"/>
+        <input type="button" id="clear" value="Limpiar" onclick="clear_canvas();" title="Tecla de acceso: L"/>
+        <input type="button" id="get_inst" value="Tomar instant&aacute;nea" onclick="takeCanvasPreview('canvas_preview');" title="Tecla de acceso: T"/>
+        <input type="button" id="anm2json" value="Animaci&oacute;n a JSON" onclick="animToJSON()" />
+        <div id="footer">
+            <a id="help" href="help.html" title="Ayuda, descripci&oacute;n o ...">
+                <img src="images/button-question.svg" alt="Ayuda" width="32" height="32" />
+            </a>
+            Im&aacute;genes generadas utilizando la <a href="http://www.w3.org/TR/2dcontext/">API Canvas 2D Context</a> 
+            y funciones matem&aacute;ticas,<br/>
+            por <a id="mail">L&aacute;zaro Daniel</a>;
+            probado en <a href="http://www.mozilla.org/">Firefox 25</a>, <a href="http://www.google.com/chrome/">Chrome 29</a>
+            y <a href="http://www.opera.com/">Opera 16</a>; marzo 2014.
+        </div>
+    </body>
+</html>

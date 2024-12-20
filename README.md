@@ -1,5 +1,5 @@
 # canvas
-## Playing with Canvas API, maths, shapes &amp; colors for fun
+## Playing with Canvas API, maths, shapes &amp; colors for fun and learning
 
 You can find some images like this in the "images" directory:
 
@@ -7,4 +7,7 @@ You can find some images like this in the "images" directory:
 
 ![example image 2](https://raw.githubusercontent.com/danielxdad/canvas/main/images/example-img-9.png)
 
-or running the app
+You can serve/run the web app with the built-in http server of Python 3:
+
+python3 -m http.server
+

@@ -61,9 +61,10 @@
          */
         function onBodyResize(evnt) {
             function isFullScreen() {
-                // Por Firefox :(
-                if ((screen.width - window.innerWidth < 10) && (screen.height - window.innerHeight < 10)) return true;
-                return false;
+                return window.fullScreen
+                    || document.fullscreen
+                    || document.fullscreenElement !== null
+                    || (screen.width - window.innerWidth < 20 && screen.height - window.innerHeight < 20)
             };
 
             if (isFullScreen()) {
@@ -82,8 +83,7 @@
                         + '(' + $('select#sel_predefined > option:selected').index() + '/'
                         + $('select#sel_predefined > option').length + ')');
                 }
-            }
-            else {
+            } else {
                 $('body>*:not(canvas)').css('display', '');
                 $('body').css('cursor', 'auto');
                 $('canvas#canvas_id').attr('title', 'Inicie el modo pantalla completa para ver la animacion maximizada');
@@ -195,12 +195,6 @@
                 context = canvas.getContext('2d');
                 context.fillStyle = 'rgba(0,0,0,1)';
                 context.fillRect(0, 0, canvas.width, canvas.height);
-
-                $('input#save_all_instances').css({'display': 'none', 'visibility': 'hidden'}).attr({'disabled': true, });
-
-                if (ua.browser == 'chrome' || ((ua.browser == 'opr' || ua.browser == 'opera') && parseInt(ua.version) >= 16)) {
-                    $('input#save_all_instances').css({'display': '', 'visibility': ''}).attr({'disabled': false, });
-                }
             } else {
                 window.location = 'error_not_support.html';
             }
@@ -518,6 +512,10 @@
         <option
             value='{"xmid":"canvas.width/2;","inc_angle":"30*Math.PI/180","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.asin(Math.cos(pix.angle)) * pix.radio","inc_radio":"1","toevalY":"pix.ymid + Math.acos(Math.tan(pix.angle)) * pix.radio;","shadow":false}'>
             Sin t&iacute;tulo 26
+        </option>
+        <option
+            value='{"xmid":"canvas.width/2;","inc_angle":"Math.pow(Math.E, Math.PI)","ymid":"canvas.height/2;","init_radio":"1","toevalX":"pix.xmid + Math.cos(pix.angle) * pix.radio;","inc_radio":"1","toevalY":"pix.ymid + Math.sin(pix.angle) * pix.radio;","shadow":false}'>
+            Sin t&iacute;tulo 27
         </option>
     </select>
     </p>

@@ -7,6 +7,8 @@ You can find some images like this in the "images" directory:
 
 ![example image 2](https://raw.githubusercontent.com/danielxdad/canvas/main/images/example-img-9.png)
 
+![example image 3](https://raw.githubusercontent.com/danielxdad/canvas/main/images/example-img-11.png)
+
 You can serve/run the web app with the built-in http server of Python 3:
 
 python3 -m http.server
